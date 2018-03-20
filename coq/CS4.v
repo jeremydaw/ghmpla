@@ -78,10 +78,12 @@ dependent induction H ; auto.
   assumption.
 - eapply nd_apply.
   apply IHND_Proof1.
+  intuition.
   apply IHND_Proof2.
+  intuition.
 - eapply nd_boxE.
-  apply IHND_Proof1.
-  apply IHND_Proof2.
+  apply IHND_Proof1; intuition.
+  apply IHND_Proof2; intuition.
 Qed.
 
 Hint Resolve nd_weakening_thyps.
@@ -334,10 +336,10 @@ dependent induction H.
     intuition.
 - apply nd_intro.
   apply nd_exchange.
-  assumption.
+  apply (nd_boxE D _ A B);  intuition.
 - eapply nd_apply.
-  + exact IHND_Proof1.
-  + exact IHND_Proof2. 
+  + apply IHND_Proof1; intuition.
+  + apply IHND_Proof2; intuition.
 - apply (nd_boxE D (G,(#A)) (A) (#A0)).
   + intuition.
   + intuition.
@@ -401,29 +403,31 @@ Lemma nd_weakening_vhyps :
 Proof.
 intros.
 dependent induction H.
-* apply nd_thyp.
-* apply nd_elem_vhyps.
+- apply nd_thyp.
+- apply nd_elem_vhyps.
   assert(elem B (D;D')).
-  rewrite <-x.
-  intuition.
-  apply elem_conc_split in H.
-  destruct H.
-  + apply elem_conc_L.
-    intuition.
-  + apply elem_conc_R. 
+  + rewrite <-x. intuition.
+  + apply elem_conc_split in H.
+    destruct H.
+    * apply elem_conc_L.
+      intuition.
+    * apply elem_conc_R. 
     assumption.
-* apply nd_intro.
+- apply nd_intro.
   apply IHND_Proof.
-* eapply nd_apply.
+  intuition.
+- eapply nd_apply.
   + apply IHND_Proof1; intuition.
   + apply IHND_Proof2; intuition.
-* apply nd_boxI.
+- apply nd_boxI.
   apply IHND_Proof.
-* eapply nd_boxE.
+  intuition.
+- eapply nd_boxE.
   + apply IHND_Proof1.
+    intuition.
   + rewrite ctx_snoc_conc.
-  apply IHND_Proof2. 
-  reflexivity.
+    apply IHND_Proof2. 
+    reflexivity.
 Qed.
 
 Hint Resolve nd_weakening_vhyps.

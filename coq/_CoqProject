@@ -1,5 +1,5 @@
 -R . MLS4
--I .
+
 ModalLogic.v
 Context.v
 HK4.v

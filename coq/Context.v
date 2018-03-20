@@ -1,4 +1,7 @@
-(* Contexts and Properties *)
+(** Contexts and Properties *)
+(** This module is for a general theory of contexts implemented as 
+snoc lists where the focused element in the context is at the right-hand side.
+ *)
 
 Require Import Coq.Program.Equality.
 Require Import ModalLogic.
@@ -6,7 +9,7 @@ Require Import ModalLogic.
 
 Set Implicit Arguments.
 
-(*Definition of Context of Formulae*)
+(** Definition of Context of Formulae *)
 Inductive ctx : Type :=
  | empty : ctx
  | snoc : ctx -> Formula -> ctx.
