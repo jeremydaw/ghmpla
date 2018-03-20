@@ -1,20 +1,20 @@
-(* Hilbert style System HK from
-   Sara Negri & Raul Hakli
- *)
+(** Hilbert style System HK4 from
+  ''Does the deduction theorem fail for modal logic?'' 
+   Sara Negri & Raul Hakli (2012)
+   *)
 
 Require Import Coq.Program.Equality.
 Require Import ModalLogic.
 Require Import Omega.
 Require Import Context.
 
-(* HK extended with axioms for T and 4, 
-   modal logic with local hypotheses *)
-(* it remains the axioms for possibility and negation *)
-(* | Ax5: forall (G: ctx) (A: Formula), 
-       Deriv G ((Not(Not A)) ==> A)  *)
-(* as remarked by the authors, there is no substitution rule,
+(** --------------- INFERENCE RULES --------------- *)
+(** System HK for modal logic with local hypotheses, 
+  without negation but extended with modal axioms for T and 4.
+  As remarked by the authors, there is no substitution rule,
   the axiom schemata is used to perform implicit substitutions 
-  giving instances of axioms whenever it is needed *)
+  giving instances of axioms whenever it is needed 
+*)
 
 
 Inductive Deriv: ctx -> Formula -> Prop:=
@@ -47,171 +47,157 @@ Inductive Deriv: ctx -> Formula -> Prop:=
       
 | Nec:  forall (G: ctx) (A: Formula), 
         Deriv empty A -> Deriv G (Box A).
-       
-Hint Constructors Deriv.
 
+Hint Constructors Deriv.
 
 Notation "G |- A" := (Deriv G A) (at level 30).
 
 
-Lemma Ax0: forall (G:ctx) (A:Formula),
-              G |- (A ==> A).
+(** 
+ Verification of statements in the article and 
+ in addition other useful lemmas, 
+ some of them are the dettached versions of the axioms
+ *)
+
+Lemma Ax0: 
+  forall (G:ctx) (A:Formula), G |- (A ==> A).
 Proof.
 intros.
-assert(H:=AxK empty A A).
-assert(H1:=AxW G A A).
-change G with (G;empty).
-eauto.
+assert (H := AxK empty A A).
+assert (H1:= AxW G A A).
+rewrite <- (ctx_conc_empty G).
+eapply MP in H1.
+- exact H1.
+- exact H.
 Qed.
 
 Hint Resolve Ax0.
 
 
-Lemma AxC_dett: forall (G:ctx) (A B C:Formula),
-                G |- (A ==> B ==> C) -> G |- (B ==> A ==> C).
+Lemma AxC_dett: 
+  forall (G:ctx) (A B C:Formula),
+  G |- (A ==> B ==> C) -> G |- (B ==> A ==> C).
 Proof.
 intros.
-replace G with (empty;G).
+rewrite <- (ctx_empty_conc G).
 eapply MP.
-exact H.
-intuition.
-apply ctx_empty_conc.
+- exact H.
+- intuition.
 Qed.
 
 Hint Resolve AxC_dett.
 
 
 (* Theorem 4.2 Deduction *)
-Theorem T2_deductionTh: 
+Theorem DeductionTh: 
   forall (G: ctx) (A B: Formula), (G,A) |- B -> G |- (A ==> B).
 Proof.
 intros G A B H.
-dependent induction H.
+dependent induction H; rewrite <- (ctx_empty_conc G).
 - apply elem_inv in H.
   destruct H.
   + rewrite H.
     apply Ax0.
-  + rewrite <- (ctx_empty_conc G).
-    eapply MP.
-    Focus 2.
-    apply AxK.
-    intuition.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
-  apply AxK.
-  apply AxK.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
-  apply AxK.
+  + eapply (MP _ _ A0 (A==> A0)); intuition.
+- eapply (MP _ _ (A0 ==> B ==> A0) _); apply AxK.
+- eapply (MP _ _ ((A0 ==> A0 ==> B) ==> A0 ==> B)).
   apply AxW.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
   apply AxK.
+- eapply (MP _ _ ((A0 ==> B ==> C) ==> B ==> A0 ==> C) _).
   apply AxC.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
   apply AxK.
+- eapply (MP _ _ ((B ==> C) ==>(A0 ==> B) ==> A0 ==> C) _ ).
   apply AxB.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
   apply AxK.
+- eapply (MP _ _ (# (A0 ==> B) ==> # A0 ==> # B) _).
   apply AxBoxK.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
   apply AxK.
+- eapply (MP _ _ (# A0 ==> A0) _).
   apply AxT.
-- rewrite <- (ctx_empty_conc G).
-  eapply MP.
-  Focus 2.
   apply AxK.
+- eapply (MP _ _ (# A0 ==> # # A0) _).
   apply Ax4.
-- assert(K:=x).
+  apply AxK.
+- rewrite ctx_empty_conc.
+  assert(X:=x).
   apply ctx_decomposition in x.
   destruct x.
   + destruct H1.
     rewrite H2 in H0.
     apply IHDeriv2 in H2.
     apply AxC_dett in H2.
+    rewrite H1 in H.
     rewrite <- (ctx_conc_empty G).
     eapply MP.
-    rewrite H1 in H.
-    exact H.
-    assumption.
+    -- exact H.
+    -- assumption.
   + destruct H1.
     assert (W := H1).
     apply IHDeriv1 in H1.
-    rewrite W in K.
-    simpl in K.
-    inversion K.
-    assert (empty |- ((A0 ==> B) ==> (A ==>A0) ==> (A ==> B))).
-    intuition.
+    rewrite W in X.
+    simpl in X.
+    inversion X.
+    assert (empty |- ((A0 ==> B) ==> (A ==>A0) ==> (A ==> B))); intuition.
     assert (G' |- ((A ==> A0) ==> A ==> B)).
-    eapply MP in H2.
-    Focus 2.
-    exact H0.
-    rewrite (ctx_empty_conc G') in H2.
-    exact H2.
-    eapply MP.
+    -- eapply MP in H2.
+       Focus 2.
+       exact H0.
+       rewrite (ctx_empty_conc G') in H2.
+       exact H2.
+    -- eapply MP.
     exact H1.
     exact H4.
-- rewrite <- (ctx_empty_conc G). 
-  eapply MP.
-  * apply Nec.
+    (* this subproof leaves an unsolved and unfocused goal !!!
+    eapply (MP _ _ (A ==>A0) (A ==> B)).
+    -- exact H1.
+    -- rewrite <- (ctx_empty_conc G').
+       eapply (MP G' empty (A0 ==> B) ((A ==> A0) ==> A ==> B) _).
+       apply AxB. *)
+- eapply MP. 
+  + apply Nec.
     exact H.
-  * apply AxK.
+  + apply AxK.
 Qed. 
 
-Hint Resolve T2_deductionTh.
+Hint Resolve DeductionTh.
 
 
 (* Corollary 4.3  Multiple Discharge*)
-Lemma AxC3_multihyp:
+Corollary multihyp_discharge:
   forall (n:nat) (G: ctx) (A B: Formula),
   G;(replicate A n) |- B -> G |- (A==>B).
 Proof.
 intros.
-dependent induction n.
-- simpl in H.
-  rewrite <- (ctx_empty_conc G). 
-  eapply MP.
-  Focus 2.
-  apply AxK.
-  assumption.
-- simpl in H.
-  apply T2_deductionTh in H.
+dependent induction n; simpl in H ; rewrite <- (ctx_empty_conc G). 
+- eapply (MP _ _ B (A ==> B)).
+  + assumption.
+  + apply AxK.
+- apply DeductionTh in H.
   apply IHn in H.
-  rewrite <- (ctx_empty_conc G).
   eauto.
 Qed.
 
-Hint Resolve AxC3_multihyp.
+Hint Resolve multihyp_discharge.
 
 
-(* Corollary 4.4 Substitution *)
-Lemma AxC4_cut:
+(* Corollary 4.4 Substitution or closure under composition *)
+Corollary substitution:
   forall (G G': ctx) (A B: Formula),
   (G |- A) -> (G',A |- B) -> (G';G |- B).
 Proof.
 intros.
-apply T2_deductionTh in H0.
+apply DeductionTh in H0.
 eapply MP.
-exact H.
-exact H0.
+- exact H.
+- exact H0.
 Qed.
 
-Hint Resolve AxC4_cut.
+Hint Resolve substitution.
 
 
 (* Theorem 4.5 Inverse Deduction*)
-Lemma T5_reverseDT:
-  forall (G: ctx) (A B: Formula),
-  G |- (A ==> B) -> G,A |- B.
+Theorem inverseDT:
+  forall (G: ctx) (A B: Formula), G |- (A ==> B) -> G,A |- B.
 Proof.
 intros.
 assert ((empty,A)|- A); intuition.
@@ -221,11 +207,11 @@ exact H0.
 exact H.
 Qed.
 
-Hint Resolve T5_reverseDT.
+Hint Resolve inverseDT.
 
 
 (* Theorem 4.6 General Deduction Theorem*)
-Theorem T2_deductionTh_genPremise: 
+Theorem deductionTh_genPremise: 
   forall (G' G: ctx) (A B: Formula), (G,A);G' |- B -> G;G' |- (A ==> B).
 Proof.
 intro.
@@ -288,7 +274,6 @@ Qed.
 
 Hint Resolve AxW_dett.
 
-Hint Resolve AxW_dett.
 
 (* Lemma 4.8 Context Contraction *)
 Lemma ctx_contraction: forall (G:ctx) (A:Formula),

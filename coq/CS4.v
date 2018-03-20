@@ -1,5 +1,6 @@
 (** Natural Deduction System for necessity from
-  ''A judmental reconstruction of Modal Logic'' of Pfenning & Davies (2001).
+  ''A judmental reconstruction of Modal Logic'' 
+   Pfenning & Davies (2001)
  *)
 
 (** Original development by Selene Linares mater's thesis. *)
@@ -30,8 +31,7 @@ Inductive ND_Proof : ctx -> ctx -> Formula -> Prop :=
 
 | nd_boxE : forall (D: ctx) (G: ctx) (A C: Formula),
              ND_Proof D G (Box A) -> ND_Proof (D,A) G C ->
-             ND_Proof D G C
-.
+             ND_Proof D G C.
 
 Hint Constructors ND_Proof.
 

@@ -28,7 +28,7 @@ Qed.
 Hint Resolve eq_ctx_dec.
 
 (** Decidability of empty context *)
-Proposition eq_ctx_dec_empty (G:ctx): {G=empty} + {G<>empty}.
+Proposition eq_ctx_dec_empty (G:ctx): {G = empty} + {G <> empty}.
 Proof.
 intros.
 decide equality.
@@ -264,7 +264,7 @@ Qed.
 
 Hint Resolve ctx_eq_snoc_cancell.
 
-
+(* 
 Lemma ctx_eq_snoc_empty:
   forall (G : ctx) (A : Formula), (G,A) = ((G,A) ; empty).
 Proof.
@@ -274,7 +274,7 @@ reflexivity.
 Qed.
 
 Hint Resolve ctx_eq_snoc_empty.
-
+ *)
 
 Lemma ctx_eq_conc_empty:
   forall (G G': ctx), (G;G') = empty -> G = empty /\ G'= empty.
