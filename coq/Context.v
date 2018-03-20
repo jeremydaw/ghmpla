@@ -1,13 +1,14 @@
 (** Contexts and Properties *)
-(** This module is for a general theory of contexts implemented as 
-snoc lists where the focused element in the context is at the right-hand side.
+
+(** This module is for context manipulation.
+Contexts are implemented as snoc lists where the focused element in the context is at the right-hand side.
  *)
 
 Require Import Coq.Program.Equality.
 Require Import ModalLogic.
 
-
 Set Implicit Arguments.
+
 
 (** Definition of Context of Formulae *)
 Inductive ctx : Type :=
@@ -17,7 +18,7 @@ Inductive ctx : Type :=
 Notation " G , p " := (snoc G p) (at level 20, p at next level).
 
 
-(* Definition of equality between contexts *)
+(** Definition of equality between contexts *)
 Proposition eq_ctx_dec (G G': ctx): {G = G'} + {G <> G'}.
 Proof.
 intros.
@@ -26,7 +27,7 @@ Qed.
 
 Hint Resolve eq_ctx_dec.
 
-
+(** Decidability of empty context *)
 Proposition eq_ctx_dec_empty (G:ctx): {G=empty} + {G<>empty}.
 Proof.
 intros.
@@ -36,10 +37,10 @@ Qed.
 Hint Resolve eq_ctx_dec_empty.
 
 
-(************* CONTEXT OPERATIONS **************)
+(** --------------- CONTEXT OPERATIONS --------------- *)
 
-(* Context concatenation *)
-Fixpoint conc (G G' : ctx) : ctx :=
+(** Context concatenation *)
+Fixpoint conc (G G': ctx) : ctx :=
   match G' with
   | empty => G
   | snoc D q => snoc (conc G D) q
@@ -49,8 +50,8 @@ Hint Unfold conc.
 
 Notation " G ; D " := (conc G D) (at level 20).
 
-
-Fixpoint elem (a:Formula) (G:ctx)  : Prop :=
+(** Membership function *)
+Fixpoint elem (a: Formula) (G: ctx) : Prop :=
   match G with
   | empty => False
   | G',b => b = a \/ elem a G'
@@ -59,9 +60,31 @@ Fixpoint elem (a:Formula) (G:ctx)  : Prop :=
 Hint Unfold elem.
 
 
-(*************CONTEXT PROPERTIES **************)
+(** Definition of a boxed context *)
+Fixpoint boxed (c:ctx) : ctx :=
+  match c with
+  | empty => empty
+  | snoc G' b  => snoc (boxed G') (Box b)
+  end.
+  
+Hint Unfold boxed.
 
-(*********** ABOUT ELEM ************)
+
+(** Function that constructs a context with 
+n occurrences of a given formula*)
+
+Fixpoint replicate (A: Formula) (n: nat): ctx :=
+  match n with
+  | 0 => empty
+  | S n => (replicate A n,A)
+  end.
+
+Hint Unfold replicate.
+
+
+(** --------------- CONTEXT PROPERTIES ---------------*)
+
+(** ABOUT ELEM *)
 
 Lemma elem_empty: 
   forall (A: Formula), ~ elem A empty.
@@ -126,8 +149,7 @@ Hint Resolve elem_inv.
 
 
 Lemma elem_ctxsplit:
-  forall (A: Formula) (G: ctx), 
-  elem A G -> exists G1, exists G2, G=(G1,A);G2.
+  forall (A: Formula) (G: ctx), elem A G -> exists G1, exists G2, G=(G1,A);G2.
 Proof.
 intros.
 induction G.
@@ -170,21 +192,6 @@ induction G'; simpl in H.
 Qed.
 
 Hint Resolve elem_conc_split.
-
-
-Lemma elem_conc: 
-  forall (A:Formula) (G G0 G1: ctx),  
-  G=(G0;G1) -> elem A G -> elem A G0 \/ elem A G1.
-Proof.
-intros.
-rewrite H in H0.
-case (elem_conc_split A G0 G1).
-+ assumption.
-+ intro; left; trivial.
-+ intro; right; trivial.
-Qed.
-
-Hint Resolve elem_conc.
 
 
 Lemma elem_conc_L: 
@@ -234,7 +241,7 @@ Qed.
 Hint Resolve elemSplit.
 
 
-(*********** ABOUT CONC ************)
+(** --------------- ABOUT SNOC and CONC --------------- *)
 
 Proposition ctx_eq_snoc:
   forall (G G':ctx) (A:Formula), G = G' -> G,A = G',A.

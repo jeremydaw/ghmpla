@@ -1,6 +1,7 @@
 # nd-ax-nec
 
 This is the repository corresponding to the article "*The equivalence of natural deduction and axiomatic characterizations of necessity, a formal verification" submitted to the AiML 2018 conference*.
+
 **Authors** 
 Lourdes del Carmen González-Huesca, Favio E. Miranda-Perea and P. Selene Linares-Arévalo.
 Departamento de Matemáticas, Facultad de Ciencias, UNAM. 

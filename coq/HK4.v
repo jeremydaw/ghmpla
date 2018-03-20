@@ -170,17 +170,6 @@ Qed.
 Hint Resolve T2_deductionTh.
 
 
-(* Function that constructs a context with 
-n occurrences of a given formula*)
-
-Fixpoint replicate (A: Formula) (n: nat): ctx :=
-  match n with
-  | 0 => empty
-  | S n => (replicate A n,A)
-  end.
-
-Hint Unfold replicate.
-
 (* Corollary 4.3  Multiple Discharge*)
 Lemma AxC3_multihyp:
   forall (n:nat) (G: ctx) (A B: Formula),
