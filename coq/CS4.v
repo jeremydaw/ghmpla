@@ -37,6 +37,7 @@ Hint Constructors ND_Proof.
 
 
 (** --------------- STRUCTURAL RULES --------------- *)
+(** Structural rules for contexts of true formulas *)
 
 Lemma nd_elem_thyps: 
   forall (D: ctx) (G : ctx) (A: Formula), elem A G -> ND_Proof D G A.
@@ -122,8 +123,6 @@ intuition.
 Qed.
 
 Hint Resolve nd_exchange.
-
-(** --------------- STRUCTURAL CONTEXT RULES --------------- *)
 
 
 Lemma ctx_weak_R: 
@@ -237,6 +236,8 @@ Qed.
 Hint Resolve nd_subst.
 
 
+(** Structural rules for contexts of valid formulas *)
+
 Lemma nd_elem_vhyps: 
   forall (D: ctx) (G : ctx) (A: Formula), 
          elem A D -> ND_Proof D G A.
@@ -252,7 +253,6 @@ assert( exists D1, exists D2, D=(D1,A);D2 ).
 Qed.
 
 Hint Resolve nd_elem_vhyps.
-
 
 
 Lemma nd_weakening_vhyps : 
@@ -360,6 +360,8 @@ Qed.
 
 Hint Resolve Axiom_K.
 
+(** 
+  Transference relationship of formulas from one context to another *)
 
 (** Valid formulas are necessary truths *)
 Proposition val_to_true: 
@@ -483,17 +485,3 @@ induction D.
 Qed.
 
 Hint Resolve ctx_true_to_val.
-
-Lemma boxed_conc:
-forall (G G':ctx), boxed (G;G') = (boxed G);(boxed G').
-Proof.
-intros.
-induction G'; auto.
-simpl.
-rewrite IHG'.
-reflexivity.
-Qed.
-
-Hint Resolve boxed_conc.
-
-

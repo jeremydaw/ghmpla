@@ -394,3 +394,17 @@ case_eq D; intro.
 Qed.
 
 Hint Resolve ctx_decomposition.
+
+
+
+Lemma boxed_conc:
+forall (G G':ctx), boxed (G;G') = (boxed G);(boxed G').
+Proof.
+intros.
+induction G'; auto.
+simpl.
+rewrite IHG'.
+reflexivity.
+Qed.
+
+Hint Resolve boxed_conc.
