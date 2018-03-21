@@ -181,8 +181,9 @@ Qed.
 Hint Resolve ctx_exch_snoc.
 
 
-Lemma ctx_exch_conc: forall (G' D G:ctx) (A B:Formula),
- ND_Proof D ((G,A);G') B -> ND_Proof D (G;(G',A)) B.
+Lemma ctx_exch_conc: 
+  forall (G' D G:ctx) (A B:Formula),
+   ND_Proof D ((G,A);G') B -> ND_Proof D (G;(G',A)) B.
 Proof.
 intro.
 induction G'.

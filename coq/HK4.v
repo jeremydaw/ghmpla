@@ -218,19 +218,19 @@ intro.
 induction G' ; auto.
 intros.
 simpl in H.
-apply T2_deductionTh in H.
+apply DeductionTh in H.
 apply IHG' in H.
 apply AxC_dett in H.
-apply T5_reverseDT in H.
+apply inverseDT in H.
 auto.
 Qed.
 
-Hint Resolve T2_deductionTh_genPremise.
+Hint Resolve deductionTh_genPremise.
 
 
 (* Lemma 4.7 Context Permutation *)
-Lemma ctx_permutation: forall (G G':ctx) (A:Formula),
-         G;G' |- A -> G';G |- A.
+Lemma ctx_permutation: 
+  forall (G G':ctx) (A:Formula), G;G' |- A -> G';G |- A.
 Proof.
 intro G.
 induction G.
@@ -240,21 +240,21 @@ induction G.
   assumption.
 - intros.
   simpl.
-  apply T5_reverseDT.
+  apply inverseDT.
   apply IHG.
-  apply T2_deductionTh_genPremise in H.
+  apply deductionTh_genPremise in H.
   assumption.
 Qed.
 
 Hint Resolve ctx_permutation.
 
 
-Lemma AxC6_contraction_hyp:
+Corollary contraction_hyp:
   forall (G : ctx) (A B : Formula), (G, A), A |- B -> G, A |- B.
 Proof.
 intros.
-apply T5_reverseDT.
-repeat apply T2_deductionTh in H.
+apply inverseDT.
+repeat apply DeductionTh in H.
 assert(K:= AxW empty A B).
 rewrite <- (ctx_empty_conc G).
 eapply MP.
@@ -262,7 +262,7 @@ exact H.
 assumption.
 Qed.
 
-Hint Resolve AxC6_contraction_hyp.
+Hint Resolve contraction_hyp.
 
 
 Lemma AxW_dett: forall (G:ctx) (A B:Formula),
@@ -276,18 +276,18 @@ Hint Resolve AxW_dett.
 
 
 (* Lemma 4.8 Context Contraction *)
-Lemma ctx_contraction: forall (G:ctx) (A:Formula),
-                 G;G |- A -> G |- A.
+Lemma ctx_contraction: 
+  forall (G:ctx) (A:Formula), G;G |- A -> G |- A.
 Proof.
 intro.
 induction G.
 - auto.
-- intros. 
-  apply T2_deductionTh_genPremise in H.
+- intros.
+  apply deductionTh_genPremise in H.
   simpl in H.
-  apply T2_deductionTh in H.
+  apply DeductionTh in H.
   apply AxW_dett in H.
-  apply T5_reverseDT.
+  apply inverseDT.
   apply IHG.
   assumption.
 Qed.
@@ -300,8 +300,7 @@ Lemma transitivity:
   G |- ((A ==> B) ==> ((B ==> C) ==> (A==> C))).
 Proof.
 intros.
-replace G with (empty;G).
-Focus 2. intuition.
+rewrite <- (ctx_empty_conc G).
 eapply MP.
 Focus 2.
 eapply AxC.
@@ -328,14 +327,14 @@ Qed.
 Hint Resolve trans_dett.
 
 
-Lemma b1_dett: forall (G:ctx) (A B:Formula),
-                (G |- #(A ==> B)) -> G|- (#A ==> #B).
+Lemma Axb1_dett: 
+  forall (G:ctx) (A B:Formula), (G |- #(A ==> B)) -> G|- (#A ==> #B).
 Proof.
 intros.
 rewrite <- (ctx_empty_conc G).
 eapply MP.
-exact H.
-apply AxBoxK.
+- exact H.
+- apply AxBoxK.
 Qed.
 
-Hint Resolve b1_dett.
+Hint Resolve Axb1_dett.

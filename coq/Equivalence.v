@@ -1,15 +1,17 @@
-(* Equivalence of CS4 and HK4*)
+(** Equivalence of CS4 and HK4*)
+
+
 Require Import Coq.Program.Equality.
 Require Import ModalLogic.
+Require Import Context.
 Require Export CS4.
 Require Export HK4.
-Require Import Context.
 
 
-(* From Gilbert to Gentzen *)
+(** From Hilbert to Gentzen *)
 
-Lemma nd_thyp_last: forall (D G:ctx) (A:Formula),
-                       ND_Proof D (G,A) A.
+Lemma nd_thyp_last: 
+  forall (D G:ctx) (A:Formula), ND_Proof D (G,A) A.
 Proof.
 auto.
 Qed.
@@ -17,7 +19,8 @@ Qed.
 Hint Resolve nd_thyp_last.
 
 
-Lemma Ax0_CS: forall (D G:ctx) (A:Formula), ND_Proof D G (A ==> A).
+Lemma Ax0_CS: 
+  forall (D G:ctx) (A:Formula), ND_Proof D G (A ==> A).
 Proof.
 intros.
 apply nd_intro.
@@ -27,92 +30,83 @@ Qed.
 Hint Resolve Ax0_CS.
 
 
-Lemma Ax1_CS: forall (D G:ctx) (A B:Formula), 
-           ND_Proof D G (A ==> (B ==> A)).
+Lemma AxK_CS: 
+  forall (D G:ctx) (A B:Formula), ND_Proof D G (A ==> (B ==> A)).
 Proof.
 intros.
 repeat apply nd_intro.
 auto.
 Qed.
 
-Hint Resolve Ax1_CS.
+Hint Resolve AxK_CS.
 
 
-Lemma Ax2_CS: forall (D G:ctx) (A B:Formula), 
-           ND_Proof D G ( (A ==> (A ==> B)) ==> (A ==> B)).
+Lemma AxW_CS: 
+  forall (D G:ctx) (A B:Formula), 
+   ND_Proof D G ( (A ==> (A ==> B)) ==> (A ==> B)).
+Proof.
+intros.
+repeat apply nd_intro.
+eapply (nd_apply D _ A B).
+- eapply (nd_apply D _ A (A ==> B)); auto.
+- apply nd_thyp_last.
+Qed.
+
+Hint Resolve AxW_CS.
+
+
+Lemma AxC_CS: 
+  forall (D G:ctx) (A B C:Formula), 
+   ND_Proof D G ( (A ==> (B ==> C)) ==> (B ==> (A ==> C))).
+Proof.
+intros.
+repeat apply nd_intro.
+eapply nd_apply;auto.
+(* - eapply (nd_apply _ _ A (B ==> C)).
+  + auto.
+  + apply nd_thyp_last.
+- apply (nd_elem_thyps _ _ B).
+  auto.
+ *)
+Qed.
+
+Hint Resolve AxC_CS.
+
+Lemma AxB_CS: 
+  forall (D G:ctx) (A B C:Formula), 
+   ND_Proof D G ( (B ==> C) ==> ((A ==> B) ==> (A ==> C))).
 Proof.
 intros.
 repeat apply nd_intro.
 eapply nd_apply.
-Focus 2.
-apply nd_thyp_last.
-eapply nd_apply.
-Focus 2.
-apply nd_thyp_last.
-auto.
+- apply nd_elem_thyps. 
+  auto.
+- eapply nd_apply; auto.
 Qed.
 
-Hint Resolve Ax2_CS.
-
-
-Lemma Ax3_CS: forall (D G:ctx) (A B C:Formula), 
-           ND_Proof D G ( (A ==> (B ==> C)) ==> (B ==> (A ==> C))).
-Proof.
-intros.
-repeat apply nd_intro.
-eapply nd_apply.
-Focus 2.
-apply (nd_elem_thyps _ _ B).
-auto.
-eapply nd_apply.
-Focus 2.
-apply nd_thyp_last.
-auto.
-Qed.
-
-Hint Resolve Ax3_CS.
-
-Lemma Ax4_CS: forall (D G:ctx) (A B C:Formula), 
-           ND_Proof D G ( (B ==> C) ==> 
-                            ( (A ==> B) ==> (A ==> C)) ).
-Proof.
-intros.
-repeat apply nd_intro.
-eapply nd_apply.
-apply nd_elem_thyps.
-auto.
-eapply nd_apply.
-apply nd_elem_thyps.
-auto.
-auto.
-Qed.
-
-Hint Resolve Ax4_CS.
+Hint Resolve AxB_CS.
 
 
 (* Theorem 5.1 From axiomatic to natural deduction proofs.*)
 Theorem HK_to_CS:
-  forall (G: ctx) (A: Formula),
-  (G |- A) -> (ND_Proof empty G A).
+  forall (G: ctx) (A: Formula), (G |- A) -> (ND_Proof empty G A).
 Proof.
 intros.
 dependent induction H ; auto.
 eapply nd_apply.
-eapply ctx_weak_R.
-exact IHDeriv2.
-apply ctx_weak_L.
-assumption.
+- eapply ctx_weak_R.
+  exact IHDeriv2.
+- apply ctx_weak_L.
+  exact IHDeriv1.
 Qed.
 
 Hint Resolve HK_to_CS.
 
 
-
-(* From Getzen to Gilbert *)
+(* From Getzen to Hilbert *)
 
 Lemma boxtrans: 
-forall (G:ctx) (A B:Formula),
-G |- (#(#A) ==> B) -> G |- (#A ==> B).
+  forall (G:ctx) (A B:Formula), G |- (#(#A) ==> B) -> G |- (#A ==> B).
 Proof.
 intros.
 assert(K:=Ax4 empty A).
@@ -124,29 +118,29 @@ Qed.
 
 Hint Resolve boxtrans.
 
-Lemma GenNec_swap: forall (D:ctx) (A:Formula),
-      boxed D |-A -> 
-         forall (G:ctx), G; boxed D |- Box A.
+Lemma GenNec_swap: 
+  forall (D:ctx) (A:Formula),
+   boxed D |-A -> forall (G:ctx), G; boxed D |- Box A.
 Proof.
 intro.
 induction D; auto.
 intros.
-  simpl in H.
-  apply T2_deductionTh in H.
-  eapply IHD in H.
-  apply b1_dett in H.
-  apply boxtrans in H.
-  simpl.
-  eauto.
+simpl in H.
+apply DeductionTh in H.
+eapply IHD in H.
+apply Axb1_dett in H.
+apply boxtrans in H.
+simpl.
+eauto.
 Qed.
 
 Hint Resolve GenNec_swap.
 
 
 (* Lemma 5.2 General Neccesitation *)
-Lemma GenNec: forall (D:ctx) (A:Formula),
-      boxed D |-A -> 
-         forall (G:ctx), boxed D; G |- Box A.
+Lemma GenNec: 
+  forall (D:ctx) (A:Formula),
+   boxed D |-A -> forall (G:ctx), boxed D; G |- Box A.
 Proof.
 intros.
 apply ctx_permutation.
@@ -173,7 +167,7 @@ dependent induction H.
   simpl.
   intuition.
 - simpl in IHND_Proof.
-  apply T2_deductionTh.
+  apply DeductionTh.
   assumption.
 - apply ctx_contraction.
   eapply MP.
@@ -183,7 +177,7 @@ dependent induction H.
   simpl in IHND_Proof.
   assumption.
 - simpl in IHND_Proof2.
-  apply T2_deductionTh_genPremise in IHND_Proof2.
+  apply deductionTh_genPremise in IHND_Proof2.
   apply ctx_contraction.
   eapply MP.
   * exact IHND_Proof1.
@@ -191,3 +185,4 @@ dependent induction H.
 Qed.
 
 Hint Resolve CS_to_HK.
+
