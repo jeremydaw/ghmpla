@@ -59,7 +59,7 @@ Notation "G |- A" := (Deriv G A) (at level 30).
  some of them are the dettached versions of the axioms
  *)
 
-Lemma Ax0: 
+Lemma AxI: 
   forall (G:ctx) (A:Formula), G |- (A ==> A).
 Proof.
 intros.
@@ -71,7 +71,7 @@ eapply MP in H1.
 - exact H.
 Qed.
 
-Hint Resolve Ax0.
+Hint Resolve AxI.
 
 
 Lemma AxC_dett: 
@@ -97,7 +97,7 @@ dependent induction H; rewrite <- (ctx_empty_conc G).
 - apply elem_inv in H.
   destruct H.
   + rewrite H.
-    apply Ax0.
+    apply AxI.
   + eapply (MP _ _ A0 (A==> A0)); intuition.
 - eapply (MP _ _ (A0 ==> B ==> A0) _); apply AxK.
 - eapply (MP _ _ ((A0 ==> A0 ==> B) ==> A0 ==> B)).
