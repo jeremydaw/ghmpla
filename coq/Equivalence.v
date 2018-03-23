@@ -19,7 +19,7 @@ Qed.
 Hint Resolve nd_thyp_last.
 
 
-Lemma Ax0_CS: 
+Lemma AxI_CS: 
   forall (D G:ctx) (A:Formula), ND_Proof D G (A ==> A).
 Proof.
 intros.
@@ -27,7 +27,7 @@ apply nd_intro.
 auto.
 Qed.
 
-Hint Resolve Ax0_CS.
+Hint Resolve AxI_CS.
 
 
 Lemma AxK_CS: 
@@ -103,7 +103,7 @@ Qed.
 Hint Resolve HK_to_CS.
 
 
-(* From Getzen to Hilbert *)
+(* From Gentzen to Hilbert *)
 
 Lemma boxtrans: 
   forall (G:ctx) (A B:Formula), G |- (#(#A) ==> B) -> G |- (#A ==> B).
