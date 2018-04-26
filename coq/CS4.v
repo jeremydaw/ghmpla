@@ -368,40 +368,16 @@ Hint Resolve Axiom_K.
 Proposition val_to_true: 
   forall (D G:ctx) (A B:Formula),
    ND_Proof (D,A) G B -> ND_Proof D (G, #A) B.
+(* new simpler proof by JED *)
 Proof.
 intros.
-dependent induction H.
-- auto.
-- assert(K:=x); apply ctx_decomposition in x.
-  destruct x.
-  + destruct H.
-    inversion H0.
-    eapply nd_apply.
-    * eapply Axiom_T.
-    * intuition.
-  + destruct H.
-    rewrite H in K.
-    simpl in K.
-    inversion K.
-    intuition.
-- apply nd_intro.
-  apply nd_exchange.
-  apply (nd_boxE D _ A B);  intuition.
-- eapply nd_apply.
-  + apply IHND_Proof1; intuition.
-  + apply IHND_Proof2; intuition.
-- apply (nd_boxE D (G,(#A)) (A) (#A0)).
-  + intuition.
-  + intuition.
-- apply (nd_boxE D (G,(#A)) A C).
-  + intuition.
-  + change (G,(#A)) with (G;(empty,#A)).
-    eapply (nd_subst).
-    * exact H.
-    * simpl.
-      apply nd_weak_last.
-      apply IHND_Proof2.
-      reflexivity.
+pose (nd_boxE D (G, # A) A B).
+apply n.
+pose (nd_thyp D G empty (# A)).
+simpl in n0.
+exact n0.
+apply nd_weak_last.
+exact H.
 Qed.
 
 Hint Resolve val_to_true.
