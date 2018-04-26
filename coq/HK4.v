@@ -209,6 +209,83 @@ Qed.
 
 Hint Resolve inverseDT.
 
+(* Exchange *)
+Lemma exch_final:
+  forall (G: ctx) (A B C: Formula), (G,A,B) |- C -> G,B,A |- C.
+Proof.
+intros.
+apply DeductionTh in H.
+apply DeductionTh in H.
+apply inverseDT.
+apply inverseDT.
+apply (MP G empty (A ==> B ==> C) (B ==> A ==> C)) in H.
+rewrite ctx_empty_conc in H.
+exact H.
+apply AxC.
+Qed.
+
+Lemma exchange_end:
+  forall (G G': ctx) (A C: Formula), (G,A; G') |- C -> G ; G', A |- C.
+Proof.
+intro. intro. 
+induction G'.
+intro. intro.
+rewrite ctx_conc_empty.
+rewrite ctx_conc_empty.
+tauto.
+simpl.
+intros.
+apply exch_final.
+apply DeductionTh in H.
+apply inverseDT.
+apply IHG'.
+exact H.
+Qed.
+
+(* now can do deductionTh_genPremise non-inductively *)
+Theorem deductionTh_genPremise_alt: 
+  forall (G' G: ctx) (A B: Formula), (G,A);G' |- B -> G;G' |- (A ==> B).
+Proof.
+intros.
+apply DeductionTh.
+apply exchange_end.
+exact H.
+Qed.
+
+Lemma exchange_end_inv:
+  forall (G G': ctx) (A C: Formula), G ; G', A |- C -> (G,A; G') |- C.
+Proof.
+intro. intro. 
+induction G'.
+intro. intro.
+rewrite ctx_conc_empty.
+rewrite ctx_conc_empty.
+tauto.
+simpl.
+intros.
+apply exch_final in H.
+apply DeductionTh in H.
+apply inverseDT.
+apply IHG'.
+exact H.
+Qed.
+
+Lemma exchange:
+  forall (G G': ctx) (A B C: Formula), (G,A,B; G') |- C -> G,B,A ; G'|- C.
+Proof.
+intro. intro. 
+induction G'.
+intro. intro.
+rewrite ctx_conc_empty.
+rewrite ctx_conc_empty.
+apply exch_final.
+simpl.
+intros.
+apply DeductionTh in H.
+apply inverseDT.
+apply IHG'.
+exact H.
+Qed.
 
 (* Theorem 4.6 General Deduction Theorem*)
 Theorem deductionTh_genPremise: 
